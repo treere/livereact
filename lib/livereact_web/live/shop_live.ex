@@ -63,47 +63,27 @@ defmodule LivereactWeb.ShopLive do
   def render(assigns) do
     ~H"""
     <div class="mx-auto max-w-3xl px-4 py-8">
-      <header class="flex items-center justify-between border-b pb-4">
+      <header class="border-b pb-4">
         <h1 class="text-xl font-bold">Mercatino — totale: {@total}€</h1>
-        <nav class="flex gap-4 text-sm">
-          <.link navigate={~p"/"} class="underline">LV pura</.link>
-          <.link navigate={~p"/play"} class="underline">LV + React</.link>
-        </nav>
       </header>
 
-      <%= if @live_action == :play do %>
-        <p class="mt-4 text-sm opacity-70">
-          Guscio LiveView + isola React. Filtro e selezione vivono solo nel browser.
-        </p>
-        <div
-          id="react-island"
-          phx-hook="ReactApp"
-          phx-update="ignore"
-          data-items={Jason.encode!(@items)}
-          class="mt-4 rounded border p-4"
-        >
-          <p class="text-sm opacity-60">Carico React… (serve JS attivo)</p>
-        </div>
-      <% else %>
-        <p class="mt-4 text-sm opacity-70">Baseline LiveView pura, niente React.</p>
-        <ul class="mt-4 grid gap-2">
-          <li :for={item <- @items} class="flex items-center justify-between rounded border p-2">
-            <span>{item.name} — {item.price}€</span>
-            <button
-              phx-click="add-to-cart"
-              phx-value-id={item.id}
-              class="rounded bg-black px-3 py-1 text-white"
-            >
-              Aggiungi
-            </button>
-          </li>
-        </ul>
-      <% end %>
+      <p class="mt-4 text-sm opacity-70">
+        Guscio LiveView + isola React. Filtro e selezione vivono solo nel browser.
+      </p>
+      <div
+        id="react-island"
+        phx-hook="ReactApp"
+        phx-update="ignore"
+        data-items={Jason.encode!(@items)}
+        class="mt-4 rounded border p-4"
+      >
+        <p class="text-sm opacity-60">Carico React… (serve JS attivo)</p>
+      </div>
 
       <footer class="mt-6 rounded border p-4">
         <h2 class="font-semibold">Carrello live (server)</h2>
         <%= if @detailed == [] do %>
-          <p class="text-sm opacity-60">Vuoto. Aggiungi da sopra o da React.</p>
+          <p class="text-sm opacity-60">Vuoto. Aggiungi da React.</p>
         <% else %>
           <ul class="mt-2 text-sm">
             <li :for={row <- @detailed} class="flex items-center justify-between">

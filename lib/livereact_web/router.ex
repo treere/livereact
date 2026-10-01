@@ -17,8 +17,7 @@ defmodule LivereactWeb.Router do
   scope "/", LivereactWeb do
     pipe_through :browser
 
-    live "/", ShopLive, :index
-    live "/play", ShopLive, :play
+    live "/", ShopLive
   end
 
   # Other scopes may use custom stacks.
