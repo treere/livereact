@@ -12,6 +12,8 @@ defmodule LivereactWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug :fetch_session
+    plug :protect_from_forgery
   end
 
   scope "/", LivereactWeb do
@@ -20,10 +22,12 @@ defmodule LivereactWeb.Router do
     live "/", ShopLive
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", LivereactWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", LivereactWeb do
+    pipe_through :api
+
+    post "/session", SessionController, :create
+    delete "/session", SessionController, :delete
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:livereact, :dev_routes) do

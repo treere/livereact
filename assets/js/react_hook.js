@@ -16,6 +16,8 @@ export const ReactApp = {
       items,
       cart: [],
       total: 0,
+      currentUser: this.el.dataset.currentUser || "",
+      displayName: this.el.dataset.displayName || "",
       onSend: (event, payload) =>
         window.dispatchEvent(new CustomEvent("lv:send", {detail: {event, payload}}))
     })
@@ -31,6 +33,10 @@ export const ReactApp = {
     })
     this.handleEvent("items-updated", ({items}) => {
       if (this._island) this._island.update({items})
+    })
+    this.handleEvent("auth-changed", ({current_user, display_name}) => {
+      if (this._island)
+        this._island.update({currentUser: current_user || "", displayName: display_name || ""})
     })
   },
 

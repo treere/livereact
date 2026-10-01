@@ -5,10 +5,84 @@ function send(event, payload) {
   window.dispatchEvent(new CustomEvent("lv:send", {detail: {event, payload}}))
 }
 
-function ShopIsland({items, cart, total, onSend}) {
+function csrfToken() {
+  return document.querySelector("meta[name='csrf-token']")?.getAttribute("content") || ""
+}
+
+async function apiLogin(username) {
+  const res = await fetch("/api/session", {
+    method: "POST",
+    credentials: "same-origin",
+    headers: {"content-type": "application/json", "x-csrf-token": csrfToken()},
+    body: JSON.stringify({username})
+  })
+  if (res.status === 201) return {ok: true, data: await res.json()}
+  const data = await res.json().catch(() => ({}))
+  return {ok: false, error: data.error || "login fallito"}
+}
+
+async function apiLogout() {
+  await fetch("/api/session", {
+    method: "DELETE",
+    credentials: "same-origin",
+    headers: {"x-csrf-token": csrfToken()}
+  }).catch(() => {})
+  window.location.reload()
+}
+
+function LoginForm() {
+  const [username, setUsername] = useState("")
+  const [error, setError] = useState(null)
+  const [busy, setBusy] = useState(false)
+
+  async function submit(e) {
+    e?.preventDefault()
+    setError(null)
+    if (!username.trim()) {
+      setError("username richiesto")
+      return
+    }
+    setBusy(true)
+    try {
+      const r = await apiLogin(username.trim())
+      if (r.ok) window.location.reload()
+      else setError(r.error)
+    } catch (_e) {
+      setError("errore rete")
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <form onSubmit={submit}>
+      <div className="flex items-center gap-2">
+        <input
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="username"
+          aria-label="username"
+          className="rounded border px-2 py-1 text-sm"
+        />
+        <button
+          type="submit"
+          disabled={busy}
+          className="rounded bg-black px-3 py-1 text-white text-sm disabled:opacity-50"
+        >
+          Entra
+        </button>
+      </div>
+      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+    </form>
+  )
+}
+
+function ShopIsland({items, cart, total, currentUser, displayName, onSend}) {
   // Stato locale: non lascia MAI il browser (nessun evento WS qui)
   const [filterText, setFilterText] = useState("")
   const [selectedId, setSelectedId] = useState(null)
+
+  if (!currentUser) return <LoginForm />
 
   const emit = onSend || send
   const q = filterText.toLowerCase()
@@ -16,7 +90,13 @@ function ShopIsland({items, cart, total, onSend}) {
 
   return (
     <div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-sm opacity-70">Ciao {displayName || currentUser}</span>
+        <button onClick={apiLogout} className="text-sm underline">
+          Esci
+        </button>
+      </div>
+      <div className="mt-2 flex items-center gap-2">
         <input
           value={filterText}
           onChange={(e) => setFilterText(e.target.value)}
