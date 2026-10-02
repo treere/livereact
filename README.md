@@ -1,18 +1,29 @@
-# Livereact
+# Livereact — mercatino toy LiveView + React
 
-To start your Phoenix server:
+Pagina unica (`/`) con guscio Phoenix LiveView e isola React montata via hook.
+Stato condiviso (catalogo, carrello) sul server con broadcast PubSub; stato
+locale (filtro, selezione) solo in React, mai sincronizzato.
 
-* Run `mix setup` to install and setup dependencies
-* Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
+Login username-only via cookie firmato: gli anonimi vedono solo il form login
+(React), i loggati vedono il market. Eventi market da anonimi ignorati.
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+## Route
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+* `GET /` — guscio LiveView + isola React (gate login)
+* `POST /api/session` — login `{"username": "..."}` → `201` / `422`
+* `DELETE /api/session` — logout → `200`
 
-## Learn more
+## Sviluppo
 
-* Official website: https://www.phoenixframework.org/
-* Guides: https://hexdocs.pm/phoenix/overview.html
-* Docs: https://hexdocs.pm/phoenix
-* Forum: https://elixirforum.com/c/phoenix-forum
-* Source: https://github.com/phoenixframework/phoenix
+* Setup: `mix setup`
+* Server: `mix phx.server` → http://localhost:4000
+* Test: `mix test` · Check completo: `mix precommit`
+
+## Struttura
+
+* `lib/livereact_web/live/shop_live.ex` — guscio + gate auth + eventi carrello
+* `lib/livereact_web/controllers/session_controller.ex` — login/logout JSON
+* `assets/js/react_hook.js` — hook `ReactApp` (mount/bridge/cleanup)
+* `assets/js/shop_island.jsx` — `ShopIsland` + `LoginForm`
+* `openspec/specs/` — requisiti (`mercatino-shop`, `react-bridge`,
+  `single-page-shell`, `cookie-auth`, `login-gate`)
